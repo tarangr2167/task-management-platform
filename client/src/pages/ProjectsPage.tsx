@@ -4,6 +4,7 @@ import { createProject, deleteProject, getProjects } from "../api/projects";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useToast } from "../context/ToastContext";
 import Modal from "../components/Modal";
+import EmptyState from "../components/EmptyState";
 import type { ProjectListItem } from "../types";
 
 export default function ProjectsPage() {
