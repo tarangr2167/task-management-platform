@@ -8,7 +8,7 @@ A lightweight full-stack task management app for the Vibe Coding assessment.
 | -------- | ----------------------- |
 | Frontend | React, TypeScript, Vite |
 | Backend  | Node.js, Express        |
-| Database | PostgreSQL              |
+| Database | PostgreSQL, Prisma      |
 
 ## Project Structure
 
@@ -23,7 +23,19 @@ task-management-platform/
 
 ## Getting Started
 
-**Prerequisites:** Node.js 20+, npm 10+
+**Prerequisites:** Node.js 20+, PostgreSQL 15+, npm 10+
+
+### Database (first time)
+
+```bash
+# Create the database in PostgreSQL
+CREATE DATABASE task_management;
+
+cd server
+cp .env.example .env   # adjust DATABASE_URL if needed
+npm install
+npm run db:setup       # migrate + seed
+```
 
 ### Client
 
@@ -40,12 +52,13 @@ npm run dev
 ```bash
 cd server
 npm install
+npm run db:setup   # first time only
 npm run dev
 ```
 
 → `http://localhost:3000`
 
-Health check: `GET http://localhost:3000/api/health`
+Health check: `GET http://localhost:3000/api/health` (includes database status)
 
 ## License
 
