@@ -58,7 +58,28 @@ npm run dev
 
 → `http://localhost:3000`
 
-Health check: `GET http://localhost:3000/api/health` (includes database status)
+Health check: `GET http://localhost:3000/api/health`
+
+## API Overview
+
+Base URL: `http://localhost:3000/api`
+
+| Method | Endpoint | Description |
+| ------ | -------- | ------------- |
+| GET | `/health` | API + DB status |
+| GET | `/projects` | List projects |
+| GET | `/projects/:id` | Get project with tasks |
+| POST | `/projects` | Create project |
+| PUT | `/projects/:id` | Update project |
+| DELETE | `/projects/:id` | Delete project |
+| GET | `/tasks` | List tasks |
+| GET | `/tasks/:id` | Get task |
+| POST | `/tasks` | Create task |
+| PUT | `/tasks/:id` | Update task |
+| DELETE | `/tasks/:id` | Delete task |
+| GET | `/dashboard/stats` | Dashboard metrics |
+
+See `skills.md` for request bodies and validation rules.
 
 ## License
 
