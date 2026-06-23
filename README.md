@@ -4,11 +4,18 @@ A lightweight full-stack task management app for the Vibe Coding assessment.
 
 ## Tech Stack
 
-| Layer    | Technology              |
-| -------- | ----------------------- |
-| Frontend | React, TypeScript, Vite |
-| Backend  | Node.js, Express        |
-| Database | PostgreSQL, Prisma      |
+| Layer    | Technology                        |
+| -------- | --------------------------------- |
+| Frontend | React, TypeScript, Vite, React Router |
+| Backend  | Node.js, Express, Zod             |
+| Database | PostgreSQL, Prisma                |
+
+## Features
+
+- **Dashboard** — total projects, tasks, completed tasks, completion % with progress bar
+- **Projects** — create, search, edit, delete; view tasks per project
+- **Tasks** — filter by project, status, priority; toggle status; delete
+- **UI polish** — toast notifications, loading states, database status indicator
 
 ## Project Structure
 
@@ -25,19 +32,28 @@ task-management-platform/
 
 **Prerequisites:** Node.js 20+, PostgreSQL 15+, npm 10+
 
-### Database (first time)
+### 1. Database setup (first time)
 
 ```bash
-# Create the database in PostgreSQL
+# In PostgreSQL
 CREATE DATABASE task_management;
 
 cd server
 cp .env.example .env   # adjust DATABASE_URL if needed
 npm install
-npm run db:setup       # migrate + seed
+npm run db:setup       # migrate + seed sample data
 ```
 
-### Client
+### 2. Start the server
+
+```bash
+cd server
+npm run dev
+```
+
+→ `http://localhost:3000`
+
+### 3. Start the client
 
 ```bash
 cd client
@@ -47,18 +63,7 @@ npm run dev
 
 → `http://localhost:5173`
 
-### Server
-
-```bash
-cd server
-npm install
-npm run db:setup   # first time only
-npm run dev
-```
-
-→ `http://localhost:3000`
-
-Health check: `GET http://localhost:3000/api/health`
+The client proxies `/api` requests to the backend during development.
 
 ## API Overview
 
@@ -67,19 +72,29 @@ Base URL: `http://localhost:3000/api`
 | Method | Endpoint | Description |
 | ------ | -------- | ------------- |
 | GET | `/health` | API + DB status |
-| GET | `/projects` | List projects |
-| GET | `/projects/:id` | Get project with tasks |
-| POST | `/projects` | Create project |
-| PUT | `/projects/:id` | Update project |
-| DELETE | `/projects/:id` | Delete project |
-| GET | `/tasks` | List tasks |
-| GET | `/tasks/:id` | Get task |
-| POST | `/tasks` | Create task |
-| PUT | `/tasks/:id` | Update task |
-| DELETE | `/tasks/:id` | Delete task |
+| GET/POST | `/projects` | List / create projects |
+| GET/PUT/DELETE | `/projects/:id` | Project CRUD |
+| GET/POST | `/tasks` | List / create tasks |
+| GET/PUT/DELETE | `/tasks/:id` | Task CRUD |
 | GET | `/dashboard/stats` | Dashboard metrics |
 
-See `skills.md` for request bodies and validation rules.
+See `skills.md` for validation rules and architecture details.
+
+## Assessment Deliverables
+
+| Deliverable | Location | Status |
+| ----------- | -------- | ------ |
+| Source code | `/client`, `/server` | Complete |
+| `skills.md` | Project root | Complete |
+| `prompt.md` | Project root | Complete |
+| `README.md` | Project root | Complete |
+
+## Build for Production
+
+```bash
+cd server && npm run build && npm start
+cd client && npm run build && npm run preview
+```
 
 ## License
 

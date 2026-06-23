@@ -1,16 +1,30 @@
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { createProject, deleteProject, getProjects } from "../api/projects";
 import EmptyState from "../components/EmptyState";
+import LoadingSpinner from "../components/LoadingSpinner";
+import { useToast } from "../context/ToastContext";
 import type { ProjectListItem } from "../types";
 
 export default function ProjectsPage() {
+  const { showToast } = useToast();
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
+  const [search, setSearch] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  const filteredProjects = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return projects;
+    return projects.filter(
+      (project) =>
+        project.name.toLowerCase().includes(query) ||
+        project.description?.toLowerCase().includes(query),
+    );
+  }, [projects, search]);
 
   async function loadProjects() {
     setLoading(true);
@@ -43,9 +57,12 @@ export default function ProjectsPage() {
       });
       setName("");
       setDescription("");
+      showToast("Project created successfully");
       await loadProjects();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create project");
+      const message = err instanceof Error ? err.message : "Failed to create project";
+      setError(message);
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -58,8 +75,11 @@ export default function ProjectsPage() {
     try {
       await deleteProject(id);
       setProjects((current) => current.filter((project) => project.id !== id));
+      showToast("Project deleted");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete project");
+      const message = err instanceof Error ? err.message : "Failed to delete project";
+      setError(message);
+      showToast(message, "error");
     }
   }
 
@@ -101,14 +121,29 @@ export default function ProjectsPage() {
       {error && <p className="page-message page-message--error">{error}</p>}
 
       <section className="panel">
-        <h2>All projects</h2>
+        <div className="panel-header">
+          <h2>All projects</h2>
+          <input
+            className="search-input"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search projects..."
+          />
+        </div>
         {loading ? (
-          <p className="page-message">Loading projects...</p>
-        ) : projects.length === 0 ? (
-          <EmptyState title="No projects yet" message="Create your first project above to get started." />
+          <LoadingSpinner label="Loading projects..." />
+        ) : filteredProjects.length === 0 ? (
+          <EmptyState
+            title={projects.length === 0 ? "No projects yet" : "No matching projects"}
+            message={
+              projects.length === 0
+                ? "Create your first project above to get started."
+                : "Try a different search term."
+            }
+          />
         ) : (
           <div className="card-grid">
-            {projects.map((project) => (
+            {filteredProjects.map((project) => (
               <article key={project.id} className="card">
                 <div className="card-header">
                   <div>

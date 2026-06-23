@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getDashboardStats } from "../api/projects";
+import LoadingSpinner from "../components/LoadingSpinner";
+import ProgressBar from "../components/ProgressBar";
 import StatCard from "../components/StatCard";
 import type { DashboardStats } from "../types";
 
@@ -17,7 +19,7 @@ export default function DashboardPage() {
   }, []);
 
   if (loading) {
-    return <p className="page-message">Loading dashboard...</p>;
+    return <LoadingSpinner label="Loading dashboard..." />;
   }
 
   if (error) {
@@ -47,6 +49,10 @@ export default function DashboardPage() {
           hint={`${stats.completedTasks} of ${stats.totalTasks} tasks done`}
           accent="amber"
         />
+      </section>
+
+      <section className="panel">
+        <ProgressBar value={stats.completionPercentage} />
       </section>
 
       <section className="panel">

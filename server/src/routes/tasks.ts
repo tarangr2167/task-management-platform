@@ -1,19 +1,21 @@
 import { Router } from "express";
-import { validate } from "../middleware/validate.js";
+import { getValidated, validate } from "../middleware/validate.js";
 import * as taskService from "../services/taskService.js";
 import {
   createTaskSchema,
   taskIdParamSchema,
   taskQuerySchema,
   updateTaskSchema,
+  type CreateTaskInput,
   type TaskQueryInput,
+  type UpdateTaskInput,
 } from "../validators/taskSchemas.js";
 
 const router = Router();
 
 router.get("/", validate(taskQuerySchema, "query"), async (req, res, next) => {
   try {
-    const tasks = await taskService.listTasks(req.query as TaskQueryInput);
+    const tasks = await taskService.listTasks(getValidated<TaskQueryInput>(req, "query"));
     res.json(tasks);
   } catch (error) {
     next(error);
@@ -32,7 +34,7 @@ router.get("/:id", validate(taskIdParamSchema, "params"), async (req, res, next)
 
 router.post("/", validate(createTaskSchema), async (req, res, next) => {
   try {
-    const task = await taskService.createTask(req.body);
+    const task = await taskService.createTask(getValidated<CreateTaskInput>(req, "body"));
     res.status(201).json(task);
   } catch (error) {
     next(error);
@@ -46,7 +48,7 @@ router.put(
   async (req, res, next) => {
     try {
       const { id } = req.params as { id: string };
-      const task = await taskService.updateTask(id, req.body);
+      const task = await taskService.updateTask(id, getValidated<UpdateTaskInput>(req, "body"));
       res.json(task);
     } catch (error) {
       next(error);
