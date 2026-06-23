@@ -1,21 +1,27 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { getProject } from "../api/projects";
+import { getProject, updateProject } from "../api/projects";
 import { createTask, deleteTask, updateTask } from "../api/tasks";
 import EmptyState from "../components/EmptyState";
+import LoadingSpinner from "../components/LoadingSpinner";
 import PriorityBadge from "../components/PriorityBadge";
 import StatusBadge from "../components/StatusBadge";
+import { useToast } from "../context/ToastContext";
 import type { Priority, ProjectDetail, Status } from "../types";
 
 export default function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { showToast } = useToast();
   const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [savingProject, setSavingProject] = useState(false);
 
   async function loadProject() {
     if (!id) return;
@@ -26,6 +32,8 @@ export default function ProjectDetailPage() {
     try {
       const data = await getProject(id);
       setProject(data);
+      setEditName(data.name);
+      setEditDescription(data.description ?? "");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load project");
     } finally {
@@ -36,6 +44,29 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     loadProject();
   }, [id]);
+
+  async function handleUpdateProject(event: FormEvent) {
+    event.preventDefault();
+    if (!id || !editName.trim()) return;
+
+    setSavingProject(true);
+    setError("");
+
+    try {
+      await updateProject(id, {
+        name: editName.trim(),
+        description: editDescription.trim() || undefined,
+      });
+      showToast("Project updated");
+      await loadProject();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to update project";
+      setError(message);
+      showToast(message, "error");
+    } finally {
+      setSavingProject(false);
+    }
+  }
 
   async function handleCreateTask(event: FormEvent) {
     event.preventDefault();
@@ -54,9 +85,12 @@ export default function ProjectDetailPage() {
       setTitle("");
       setDescription("");
       setPriority("MEDIUM");
+      showToast("Task added");
       await loadProject();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create task");
+      const message = err instanceof Error ? err.message : "Failed to create task";
+      setError(message);
+      showToast(message, "error");
     } finally {
       setSubmitting(false);
     }
@@ -66,9 +100,12 @@ export default function ProjectDetailPage() {
     setError("");
     try {
       await updateTask(taskId, { status: currentStatus === "OPEN" ? "DONE" : "OPEN" });
+      showToast(currentStatus === "OPEN" ? "Task marked as done" : "Task reopened");
       await loadProject();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update task");
+      const message = err instanceof Error ? err.message : "Failed to update task";
+      setError(message);
+      showToast(message, "error");
     }
   }
 
@@ -78,14 +115,17 @@ export default function ProjectDetailPage() {
     setError("");
     try {
       await deleteTask(taskId);
+      showToast("Task deleted");
       await loadProject();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete task");
+      const message = err instanceof Error ? err.message : "Failed to delete task";
+      setError(message);
+      showToast(message, "error");
     }
   }
 
   if (loading) {
-    return <p className="page-message">Loading project...</p>;
+    return <LoadingSpinner label="Loading project..." />;
   }
 
   if (error && !project) {
@@ -111,11 +151,30 @@ export default function ProjectDetailPage() {
             ← Back to projects
           </Link>
           <h1>{project.name}</h1>
-          <p className="page-subtitle">
-            {project.description || "No description provided."}
-          </p>
+          <p className="page-subtitle">{project.tasks.length} tasks in this project</p>
         </div>
       </header>
+
+      <section className="panel">
+        <h2>Edit project</h2>
+        <form className="form-grid form-grid--wide" onSubmit={handleUpdateProject}>
+          <label>
+            Name
+            <input value={editName} onChange={(event) => setEditName(event.target.value)} required />
+          </label>
+          <label>
+            Description
+            <input
+              value={editDescription}
+              onChange={(event) => setEditDescription(event.target.value)}
+              placeholder="Optional description"
+            />
+          </label>
+          <button className="btn btn-secondary" type="submit" disabled={savingProject}>
+            {savingProject ? "Saving..." : "Save changes"}
+          </button>
+        </form>
+      </section>
 
       <section className="panel">
         <h2>Add task</h2>

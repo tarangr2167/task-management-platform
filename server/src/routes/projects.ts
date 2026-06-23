@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { validate } from "../middleware/validate.js";
+import { getValidated, validate } from "../middleware/validate.js";
 import * as projectService from "../services/projectService.js";
 import {
   createProjectSchema,
   projectIdParamSchema,
   updateProjectSchema,
+  type CreateProjectInput,
+  type UpdateProjectInput,
 } from "../validators/projectSchemas.js";
 
 const router = Router();
@@ -30,7 +32,7 @@ router.get("/:id", validate(projectIdParamSchema, "params"), async (req, res, ne
 
 router.post("/", validate(createProjectSchema), async (req, res, next) => {
   try {
-    const project = await projectService.createProject(req.body);
+    const project = await projectService.createProject(getValidated<CreateProjectInput>(req, "body"));
     res.status(201).json(project);
   } catch (error) {
     next(error);
@@ -44,7 +46,7 @@ router.put(
   async (req, res, next) => {
     try {
       const { id } = req.params as { id: string };
-      const project = await projectService.updateProject(id, req.body);
+      const project = await projectService.updateProject(id, getValidated<UpdateProjectInput>(req, "body"));
       res.json(project);
     } catch (error) {
       next(error);

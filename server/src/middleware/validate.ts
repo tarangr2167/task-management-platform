@@ -14,7 +14,12 @@ export function validate<T>(schema: ZodType<T>, part: RequestPart = "body") {
       return;
     }
 
-    req[part] = result.data as typeof req[typeof part];
+    req.validated ??= {};
+    req.validated[part] = result.data;
     next();
   };
+}
+
+export function getValidated<T>(req: Request, part: RequestPart): T {
+  return req.validated?.[part] as T;
 }

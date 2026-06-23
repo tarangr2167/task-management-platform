@@ -1,4 +1,6 @@
+import { useEffect, useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import { apiFetch } from "../api/client";
 
 const navItems = [
   { to: "/", label: "Dashboard", end: true },
@@ -6,7 +8,17 @@ const navItems = [
   { to: "/tasks", label: "Tasks", end: false },
 ];
 
+type HealthStatus = "connected" | "disconnected" | "checking";
+
 export default function Layout() {
+  const [dbStatus, setDbStatus] = useState<HealthStatus>("checking");
+
+  useEffect(() => {
+    apiFetch<{ database: string }>("/health")
+      .then((data) => setDbStatus(data.database === "connected" ? "connected" : "disconnected"))
+      .catch(() => setDbStatus("disconnected"));
+  }, []);
+
   return (
     <div className="layout">
       <aside className="sidebar">
@@ -30,6 +42,15 @@ export default function Layout() {
             </NavLink>
           ))}
         </nav>
+
+        <div className="sidebar-footer">
+          <span className={`status-dot status-dot--${dbStatus}`} />
+          <span className="sidebar-footer__text">
+            {dbStatus === "checking" && "Checking database..."}
+            {dbStatus === "connected" && "Database connected"}
+            {dbStatus === "disconnected" && "Database offline"}
+          </span>
+        </div>
       </aside>
 
       <main className="main">

@@ -3,11 +3,14 @@ import { Link } from "react-router-dom";
 import { getProjects } from "../api/projects";
 import { deleteTask, getTasks, updateTask } from "../api/tasks";
 import EmptyState from "../components/EmptyState";
+import LoadingSpinner from "../components/LoadingSpinner";
 import PriorityBadge from "../components/PriorityBadge";
 import StatusBadge from "../components/StatusBadge";
+import { useToast } from "../context/ToastContext";
 import type { Priority, ProjectListItem, Status, Task } from "../types";
 
 export default function TasksPage() {
+  const { showToast } = useToast();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [projects, setProjects] = useState<ProjectListItem[]>([]);
   const [projectId, setProjectId] = useState("");
@@ -48,9 +51,12 @@ export default function TasksPage() {
     setError("");
     try {
       await updateTask(taskId, { status: currentStatus === "OPEN" ? "DONE" : "OPEN" });
+      showToast(currentStatus === "OPEN" ? "Task marked as done" : "Task reopened");
       await loadTasks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update task");
+      const message = err instanceof Error ? err.message : "Failed to update task";
+      setError(message);
+      showToast(message, "error");
     }
   }
 
@@ -60,9 +66,12 @@ export default function TasksPage() {
     setError("");
     try {
       await deleteTask(taskId);
+      showToast("Task deleted");
       await loadTasks();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to delete task");
+      const message = err instanceof Error ? err.message : "Failed to delete task";
+      setError(message);
+      showToast(message, "error");
     }
   }
 
@@ -117,7 +126,7 @@ export default function TasksPage() {
       <section className="panel">
         <h2>All tasks</h2>
         {loading ? (
-          <p className="page-message">Loading tasks...</p>
+          <LoadingSpinner label="Loading tasks..." />
         ) : tasks.length === 0 ? (
           <EmptyState title="No tasks found" message="Try changing filters or create tasks inside a project." />
         ) : (
