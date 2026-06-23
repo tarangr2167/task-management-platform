@@ -8,7 +8,7 @@
 
 Task Management Platform for the Vibe Coding assessment.
 
-Users will manage **Projects** and **Tasks**, and view a **Dashboard** with summary stats. Work is in progress — only the initial scaffold exists today.
+Users will manage **Projects** and **Tasks**, and view a **Dashboard** with summary stats. Database layer is in place; API and UI are next.
 
 ---
 
@@ -18,7 +18,8 @@ Users will manage **Projects** and **Tasks**, and view a **Dashboard** with summ
 | -------- | ---------- | ------------------ |
 | Frontend | React 19   | Vite, TypeScript   |
 | Backend  | Express 5  | Node.js, TypeScript |
-| Database | PostgreSQL | Not connected yet  |
+| Database | PostgreSQL | Connected via Prisma |
+| ORM      | Prisma     | Schema, migrations, seed |
 
 ---
 
@@ -33,8 +34,13 @@ task-management-platform/
 │       └── index.css
 ├── server/
 │   ├── .env.example
+│   ├── prisma/
+│   │   ├── schema.prisma    # Project & Task models
+│   │   ├── seed.ts          # Sample data
+│   │   └── migrations/
 │   └── src/
-│       └── index.ts         # Express app + health route
+│       ├── index.ts         # Express app + health route
+│       └── db.ts            # Prisma client singleton
 ├── skills.md
 ├── prompt.md
 └── README.md
@@ -45,18 +51,54 @@ task-management-platform/
 ## Backend Structure
 
 ```
-server/src/index.ts
+server/src/
+├── index.ts    # Express app, DB health check
+└── db.ts       # Prisma client singleton
+
+server/prisma/
+├── schema.prisma
+├── seed.ts
+└── migrations/
 ```
 
 - Express with CORS and JSON body parsing
-- `GET /api/health` — returns `{ status, message }`
+- `GET /api/health` — returns API status and database connectivity
 
 **Environment variables** (`.env.example`):
 
-| Variable       | Default | Description        |
-| -------------- | ------- | ------------------ |
-| `PORT`         | `3000`  | API port           |
-| `DATABASE_URL` | —       | Reserved for later |
+| Variable       | Default | Description                   |
+| -------------- | ------- | ----------------------------- |
+| `PORT`         | `3000`  | API port                      |
+| `DATABASE_URL` | —       | PostgreSQL connection string  |
+
+**Database scripts** (`server/package.json`):
+
+| Script | Purpose |
+| ------ | ------- |
+| `npm run db:setup` | Run migrations + seed |
+| `npm run db:migrate` | Apply migrations only |
+| `npm run db:seed` | Insert sample data |
+| `npm run db:reset` | Reset DB, migrate, and seed |
+
+---
+
+## Entity Relationships
+
+```
+Project (1) ──────< Task (N)
+```
+
+| Entity  | Fields |
+| ------- | ------ |
+| Project | `id`, `name`, `description?`, `createdAt` |
+| Task    | `id`, `projectId`, `title`, `description?`, `priority`, `status`, `createdAt` |
+
+- `Task.projectId` references `Project.id`
+- Deleting a project deletes all its tasks (`ON DELETE CASCADE`)
+
+**Priority:** `LOW`, `MEDIUM`, `HIGH` (default `MEDIUM`)
+
+**Status:** `OPEN`, `DONE` (default `OPEN`)
 
 ---
 
@@ -84,7 +126,8 @@ client/src/
 | Step | What was added |
 | ---- | -------------- |
 | 1    | Project scaffold, this file, README |
+| 2    | Prisma schema, migrations, seed data, DB health check |
 
 ---
 
-*Next sections (Business Rules, Entity Relationships, API Endpoints, Validation Rules, etc.) will be added when we build each feature.*
+*Next sections (Business Rules, API Endpoints, Validation Rules, etc.) will be added when we build each feature.*
