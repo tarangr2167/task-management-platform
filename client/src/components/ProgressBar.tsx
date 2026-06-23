@@ -3,7 +3,11 @@ interface ProgressBarProps {
   label?: string;
 }
 
-export default function ProgressBar({ value, label }: ProgressBarProps) {
+// <<<<<<< Updated upstream
+// export default function ProgressBar({ value, label }: ProgressBarProps) {
+// =======
+export default function ProgressBar({ value, label = "Overall completion" }: ProgressBarProps) {
+// >>>>>>> Stashed changes
   const clamped = Math.min(100, Math.max(0, value));
 
   return (

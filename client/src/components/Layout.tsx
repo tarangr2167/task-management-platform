@@ -3,9 +3,9 @@ import { NavLink, Outlet } from "react-router-dom";
 import { apiFetch } from "../api/client";
 
 const navItems = [
-  { to: "/", label: "Dashboard", end: true },
-  { to: "/projects", label: "Projects", end: false },
-  { to: "/tasks", label: "Tasks", end: false },
+  { to: "/", label: "Dashboard", end: true, icon: "◫" },
+  { to: "/projects", label: "Projects", end: false, icon: "◆" },
+  { to: "/tasks", label: "Tasks", end: false, icon: "☑" },
 ];
 
 type HealthStatus = "connected" | "disconnected" | "checking";
@@ -21,6 +21,12 @@ export default function Layout() {
 
   return (
     <div className="layout">
+      <div className="ambient-bg" aria-hidden="true">
+        <span className="ambient-orb ambient-orb--1" />
+        <span className="ambient-orb ambient-orb--2" />
+        <span className="ambient-orb ambient-orb--3" />
+      </div>
+
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-icon">✓</span>
@@ -38,6 +44,7 @@ export default function Layout() {
               end={item.end}
               className={({ isActive }) => `nav-link${isActive ? " active" : ""}`}
             >
+              <span className="nav-link__icon">{item.icon}</span>
               {item.label}
             </NavLink>
           ))}

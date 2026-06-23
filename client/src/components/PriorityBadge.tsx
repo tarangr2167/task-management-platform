@@ -11,5 +11,13 @@ interface PriorityBadgeProps {
 }
 
 export default function PriorityBadge({ priority }: PriorityBadgeProps) {
-  return <span className={`badge badge-priority badge-priority--${priority.toLowerCase()}`}>{labels[priority]}</span>;
+  return (
+    <span
+      className={`badge badge-priority badge-priority--${priority.toLowerCase()}${
+        priority === "HIGH" ? " badge-priority--pulse" : ""
+      }`}
+    >
+      {labels[priority]}
+    </span>
+  );
 }

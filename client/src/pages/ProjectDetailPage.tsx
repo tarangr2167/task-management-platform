@@ -4,6 +4,7 @@ import { getProject, updateProject } from "../api/projects";
 import { createTask, deleteTask, updateTask } from "../api/tasks";
 import EmptyState from "../components/EmptyState";
 import LoadingSpinner from "../components/LoadingSpinner";
+import Modal from "../components/Modal";
 import PriorityBadge from "../components/PriorityBadge";
 import StatusBadge from "../components/StatusBadge";
 import { useToast } from "../context/ToastContext";
@@ -15,6 +16,7 @@ export default function ProjectDetailPage() {
   const [project, setProject] = useState<ProjectDetail | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<Priority>("MEDIUM");
@@ -67,6 +69,17 @@ export default function ProjectDetailPage() {
       setSavingProject(false);
     }
   }
+  function openModal() {
+    setTitle("");
+    setDescription("");
+    setPriority("MEDIUM");
+    setModalOpen(true);
+  }
+
+  function closeModal() {
+    if (submitting) return;
+    setModalOpen(false);
+  }
 
   async function handleCreateTask(event: FormEvent) {
     event.preventDefault();
@@ -82,6 +95,7 @@ export default function ProjectDetailPage() {
         description: description.trim() || undefined,
         priority,
       });
+      setModalOpen(false);
       setTitle("");
       setDescription("");
       setPriority("MEDIUM");
@@ -145,7 +159,7 @@ export default function ProjectDetailPage() {
 
   return (
     <div className="page">
-      <header className="page-header">
+      <header className="page-header page-header--row">
         <div>
           <Link to="/projects" className="back-link">
             ← Back to projects
@@ -153,6 +167,9 @@ export default function ProjectDetailPage() {
           <h1>{project.name}</h1>
           <p className="page-subtitle">{project.tasks.length} tasks in this project</p>
         </div>
+        <button className="btn btn-primary" type="button" onClick={openModal}>
+          + New task
+        </button>
       </header>
 
       <section className="panel">
@@ -215,10 +232,13 @@ export default function ProjectDetailPage() {
       <section className="panel">
         <h2>Tasks ({project.tasks.length})</h2>
         {project.tasks.length === 0 ? (
-          <EmptyState title="No tasks yet" message="Add a task to this project using the form above." />
+          <EmptyState
+            title="No tasks yet"
+            message='Click "New task" to add one to this project.'
+          />
         ) : (
           <div className="table-wrap">
-            <table className="data-table">
+            <table className="data-table data-table--responsive">
               <thead>
                 <tr>
                   <th>Title</th>
@@ -230,17 +250,17 @@ export default function ProjectDetailPage() {
               <tbody>
                 {project.tasks.map((task) => (
                   <tr key={task.id}>
-                    <td>
+                    <td data-label="Title">
                       <strong>{task.title}</strong>
                       {task.description && <p className="table-subtext">{task.description}</p>}
                     </td>
-                    <td>
+                    <td data-label="Priority">
                       <PriorityBadge priority={task.priority} />
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <StatusBadge status={task.status} />
                     </td>
-                    <td className="table-actions">
+                    <td className="table-actions" data-label="Actions">
                       <button
                         className="btn btn-secondary btn-sm"
                         type="button"
@@ -263,6 +283,46 @@ export default function ProjectDetailPage() {
           </div>
         )}
       </section>
+
+      <Modal open={modalOpen} title="Create task" onClose={closeModal}>
+        <form className="modal-form" onSubmit={handleCreateTask}>
+          <label>
+            Title
+            <input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Implement homepage"
+              required
+              autoFocus
+            />
+          </label>
+          <label>
+            Description
+            <textarea
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Optional description"
+              rows={3}
+            />
+          </label>
+          <label>
+            Priority
+            <select value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+            </select>
+          </label>
+          <div className="modal-actions">
+            <button className="btn btn-secondary" type="button" onClick={closeModal} disabled={submitting}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" type="submit" disabled={submitting}>
+              {submitting ? "Creating..." : "Create task"}
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -131,7 +131,7 @@ export default function TasksPage() {
           <EmptyState title="No tasks found" message="Try changing filters or create tasks inside a project." />
         ) : (
           <div className="table-wrap">
-            <table className="data-table">
+            <table className="data-table data-table--responsive">
               <thead>
                 <tr>
                   <th>Title</th>
@@ -144,11 +144,11 @@ export default function TasksPage() {
               <tbody>
                 {tasks.map((task) => (
                   <tr key={task.id}>
-                    <td>
+                    <td data-label="Title">
                       <strong>{task.title}</strong>
                       {task.description && <p className="table-subtext">{task.description}</p>}
                     </td>
-                    <td>
+                    <td data-label="Project">
                       {task.project ? (
                         <Link to={`/projects/${task.project.id}`} className="inline-link">
                           {task.project.name}
@@ -157,13 +157,13 @@ export default function TasksPage() {
                         "—"
                       )}
                     </td>
-                    <td>
+                    <td data-label="Priority">
                       <PriorityBadge priority={task.priority} />
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <StatusBadge status={task.status} />
                     </td>
-                    <td className="table-actions">
+                    <td className="table-actions" data-label="Actions">
                       <button
                         className="btn btn-secondary btn-sm"
                         type="button"
