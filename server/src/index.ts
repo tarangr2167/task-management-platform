@@ -2,6 +2,10 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import { prisma } from "./db.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import dashboardRouter from "./routes/dashboard.js";
+import projectsRouter from "./routes/projects.js";
+import tasksRouter from "./routes/tasks.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
@@ -25,6 +29,12 @@ app.get("/api/health", async (_req, res) => {
     });
   }
 });
+
+app.use("/api/projects", projectsRouter);
+app.use("/api/tasks", tasksRouter);
+app.use("/api/dashboard", dashboardRouter);
+
+app.use(errorHandler);
 
 async function start() {
   try {
