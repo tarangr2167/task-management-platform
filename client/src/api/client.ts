@@ -8,7 +8,7 @@ export class ApiError extends Error {
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const API_URL = import.meta.env.VITE_API_URL;
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${API_URL}/api${path}`, {
     headers: {
       "Content-Type": "application/json",
       ...options?.headers,
