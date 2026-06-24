@@ -21,6 +21,7 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -893,7 +894,16 @@ textarea {
   place-items: center;
   padding: 1rem;
   z-index: 1000;
-  animation: overlay-in 0.25s ease;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.modal-overlay--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .modal {
@@ -906,7 +916,12 @@ textarea {
   box-shadow:
     0 25px 50px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  animation: modal-in 0.35s var(--ease-out);
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.3s var(--ease-out);
+}
+
+.modal-overlay--open .modal {
+  transform: translateY(0) scale(1);
 }
 
 .modal-header {

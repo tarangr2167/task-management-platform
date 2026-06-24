@@ -9,14 +9,12 @@ interface ModalProps {
 
 export default function Modal({ open, title, onClose, children }: ModalProps) {
   useEffect(() => {
-    if (!open) return;
-
     function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (open && event.key === "Escape") onClose();
     }
 
     document.addEventListener("keydown", handleKeyDown);
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow = open ? "hidden" : "";
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -24,10 +22,13 @@ export default function Modal({ open, title, onClose, children }: ModalProps) {
     };
   }, [open, onClose]);
 
-  if (!open) return null;
-
   return (
-    <div className="modal-overlay modal-overlay--open" onClick={onClose} role="presentation">
+    <div
+      className={`modal-overlay ${open ? "modal-overlay--open" : ""}`}
+      onClick={onClose}
+      role="presentation"
+      aria-hidden={!open}
+    >
       <div
         className="modal"
         onClick={(event) => event.stopPropagation()}
