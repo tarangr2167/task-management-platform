@@ -14,13 +14,15 @@ Users manage **Projects** and **Tasks**, and view a **Dashboard** with summary s
 
 ## Technologies
 
-| Layer      | Choice           | Notes                          |
-| ---------- | ---------------- | ------------------------------ |
-| Frontend   | React 19         | Vite, TypeScript, React Router |
-| Backend    | Express 5        | Node.js, TypeScript            |
-| Validation | Zod              | API request validation         |
-| Database   | PostgreSQL       | Connected via Prisma           |
-| ORM        | Prisma           | Schema, migrations, seed       |
+
+| Layer      | Choice     | Notes                          |
+| ---------- | ---------- | ------------------------------ |
+| Frontend   | React 19   | Vite, TypeScript, React Router |
+| Backend    | Express 5  | Node.js, TypeScript            |
+| Validation | Zod        | API request validation         |
+| Database   | PostgreSQL | Connected via Prisma           |
+| ORM        | Prisma     | Schema, migrations, seed       |
+
 
 ---
 
@@ -48,6 +50,28 @@ task-management-platform/
 ├── prompt.md
 └── README.md
 ```
+
+---
+
+## Architecture Decisions
+
+- The project uses a monorepo structure with separate `client` and `server` folders to keep frontend and backend concerns isolated.
+- The backend follows a layered approach: routes → validation → services → database access.
+- Zod is used to validate incoming requests before they reach business logic.
+- Prisma handles database access, migrations, and type-safe queries.
+- All API endpoints are grouped under the `/api` prefix.
+- Environment variables are used for configuration so the same codebase works locally and in production.
+
+---
+
+## Business Rules
+
+- A project must have a name; description is optional.
+- A task must belong to a project and have a title.
+- New tasks default to `MEDIUM` priority and `OPEN` status.
+- Deleting a project automatically removes all associated tasks.
+- Dashboard completion percentage is shown as `0%` when no tasks exist.
+- Tasks can be filtered by project, priority, and status.
 
 ---
 
@@ -82,12 +106,14 @@ client/src/
 
 **Routes:**
 
-| Path | Page | Purpose |
-| ---- | ---- | ------- |
-| `/` | Dashboard | Stats + completion progress bar |
-| `/projects` | Projects | List, search, create, delete |
-| `/projects/:id` | Project detail | Edit project, manage tasks |
-| `/tasks` | Tasks | Filter by project, status, priority |
+
+| Path            | Page           | Purpose                             |
+| --------------- | -------------- | ----------------------------------- |
+| `/`             | Dashboard      | Stats + completion progress bar     |
+| `/projects`     | Projects       | List, search, create, delete        |
+| `/projects/:id` | Project detail | Edit project, manage tasks          |
+| `/tasks`        | Tasks          | Filter by project, status, priority |
+
 
 **UI extras (Step 5):** toast notifications, loading spinners, project search, edit project, DB status in sidebar
 
@@ -109,14 +135,16 @@ client/src/
 
 Base URL: `http://localhost:3000/api`
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| GET | `/health` | API + DB status |
-| GET/POST | `/projects` | List / create |
-| GET/PUT/DELETE | `/projects/:id` | Read / update / delete |
-| GET/POST | `/tasks` | List / create |
-| GET/PUT/DELETE | `/tasks/:id` | Read / update / delete |
-| GET | `/dashboard/stats` | Dashboard metrics |
+
+| Method         | Path               | Description            |
+| -------------- | ------------------ | ---------------------- |
+| GET            | `/health`          | API + DB status        |
+| GET/POST       | `/projects`        | List / create          |
+| GET/PUT/DELETE | `/projects/:id`    | Read / update / delete |
+| GET/POST       | `/tasks`           | List / create          |
+| GET/PUT/DELETE | `/tasks/:id`       | Read / update / delete |
+| GET            | `/dashboard/stats` | Dashboard metrics      |
+
 
 Task list filters: `?projectId=&status=&priority=`
 
@@ -128,10 +156,12 @@ Task list filters: `?projectId=&status=&priority=`
 Project (1) ──────< Task (N)
 ```
 
-| Entity  | Fields |
-| ------- | ------ |
-| Project | `id`, `name`, `description?`, `createdAt` |
+
+| Entity  | Fields                                                                        |
+| ------- | ----------------------------------------------------------------------------- |
+| Project | `id`, `name`, `description?`, `createdAt`                                     |
 | Task    | `id`, `projectId`, `title`, `description?`, `priority`, `status`, `createdAt` |
+
 
 **Priority:** `LOW`, `MEDIUM`, `HIGH` · **Status:** `OPEN`, `DONE`
 
@@ -139,13 +169,15 @@ Project (1) ──────< Task (N)
 
 ## Validation Rules
 
-| Resource | Field | Rules |
-| -------- | ----- | ----- |
-| Project | `name` | Required, 1–200 chars |
-| Task | `title` | Required, 1–300 chars |
-| Task | `projectId` | Required UUID, must exist |
-| Task | `priority` | `LOW` \| `MEDIUM` \| `HIGH` |
-| Task | `status` | `OPEN` \| `DONE` |
+
+| Resource | Field       | Rules                     |
+| -------- | ----------- | ------------------------- |
+| Project  | `name`      | Required, 1–200 chars     |
+| Task     | `title`     | Required, 1–300 chars     |
+| Task     | `projectId` | Required UUID, must exist |
+| Task     | `priority`  | `LOW`                     |
+| Task     | `status`    | `OPEN`                    |
+
 
 ---
 
@@ -169,10 +201,13 @@ Project (1) ──────< Task (N)
 
 ## Changelog
 
-| Step | What was added |
-| ---- | -------------- |
-| 1 | Project scaffold, skills.md, README |
-| 2 | Prisma schema, migrations, seed, DB health check |
-| 3 | Projects, Tasks, Dashboard REST APIs + Zod validation |
-| 4 | React frontend — Dashboard, Projects, Tasks pages |
-| 5 | Toasts, loading states, progress bar, project search/edit, prompt.md, final docs |
+
+| Step | What was added                                                                   |
+| ---- | -------------------------------------------------------------------------------- |
+| 1    | Project setup, skills.md, README                                                 |
+| 2    | Prisma schema, migrations, seed, DB health check                                 |
+| 3    | Projects, Tasks, Dashboard REST APIs + Zod validation                            |
+| 4    | React frontend — Dashboard, Projects, Tasks pages                                |
+| 5    | Toasts, loading states, progress bar, project search/edit, prompt.md, final docs |
+
+

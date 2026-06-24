@@ -1,22 +1,6 @@
-# AI-Assisted Workflow — prompt.md
+# AI-Assisted Workflow — [prompt.md](http://prompt.md)
 
-This document describes how AI (Cursor) was used to build the Task Management Platform for the Vibe Coding assessment.
-
----
-
-## Approach
-
-Development followed a **step-by-step workflow** with documentation updated after each step — not filled in upfront.
-
-| Step | Focus | AI role |
-| ---- | ----- | ------- |
-| 1 | Scaffold + `skills.md` / `README.md` | Plan structure, create minimal docs |
-| 2 | Database (Prisma, migrations, seed) | Schema design, migration setup |
-| 3 | Backend REST API | Routes, services, Zod validation |
-| 4 | React frontend | Pages, API integration, routing |
-| 5 | Polish + final docs | UI extras, `prompt.md`, doc review |
-
----
+This document describes how AI (Cursor + Claude) was used to build and deploy the Task Management Platform for the Vibe Coding assessment.
 
 ## Key Prompts & Decisions
 
@@ -24,55 +8,31 @@ Development followed a **step-by-step workflow** with documentation updated afte
 
 **Prompt:** Review assessment requirements and outline next steps without over-documenting upfront.
 
-**Outcome:** Agreed on monorepo layout (`client/` + `server/`), incremental `skills.md`, and a 5-step build order.
-
 ### Documentation style
 
 **Prompt:** Don't document everything initially — add to `skills.md` and `README.md` step by step.
-
-**Outcome:** Each step only added docs for what was built. Avoided stale "planned" sections.
 
 ### Step 2 — Database
 
 **Prompt:** Set up PostgreSQL with Prisma — schema, migrations, seed, health check.
 
-**AI decisions:**
-- Prisma for type-safe queries and enum support
-- UUID primary keys
-- Cascade delete on project → tasks
-- Seed script with 2 sample projects
-
 ### Step 3 — Backend API
 
 **Prompt:** Build Projects CRUD, Tasks CRUD, Dashboard stats.
-
-**AI decisions:**
-- Layered architecture: routes → validators → services → Prisma
-- Zod for request validation
-- Consistent error format: `{ "error": "message" }`
-- Task list filters via query params
 
 ### Step 4 — Frontend
 
 **Prompt:** Build Dashboard, Projects, Tasks pages connected to the API.
 
-**AI decisions:**
-- React Router for navigation
-- Vite proxy for `/api` in development
-- Dark theme UI with reusable badges and stat cards
-- Project detail page for task management per project
-
 ### Step 5 — Polish
 
 **Prompt:** Final polish and submission-ready documentation.
 
-**AI additions:**
-- Toast notifications for user feedback
-- Loading spinners and progress bar on dashboard
-- Project search on list page
-- Edit project on detail page
-- Database status indicator in sidebar
-- Final sync of `skills.md`, `README.md`, and this file
+**Prompt:** Make it responsive and add some annimation to make it look attractive.
+
+### Step 6 — Deployment & Debugging
+
+**Prompt:** Diagnose why the app worked locally but returned 404s/500s after deploying frontend to Vercel and backend to Render.
 
 ---
 
@@ -82,6 +42,7 @@ Development followed a **step-by-step workflow** with documentation updated afte
 2. **Step boundaries** — Backend before frontend avoided integration guesswork
 3. **AI for boilerplate** — Prisma schema, route scaffolding, and CSS layout were fast to generate
 4. **Human steering** — User chose doc style, step order, and when to skip ahead
+5. **Systematic deployment debugging** — checking client, server, and environment variable configuration in isolation made it possible to separate "code" bugs from "configuration" bugs
 
 ---
 
@@ -91,16 +52,7 @@ Development followed a **step-by-step workflow** with documentation updated afte
 - API health check reflects database connectivity
 - CRUD flows: create project → add tasks → mark done → dashboard updates
 - Delete cascade removes tasks when a project is deleted
+- Production deployment: frontend (Vercel) successfully calling backend (Render) end-to-end after fixing the `/api` prefix and database connection string
 
 ---
 
-## If Continuing This Project
-
-Use `skills.md` as the source of truth. Suggested next features:
-
-- User authentication
-- Task due dates
-- Kanban board view
-- Pagination on list endpoints
-
-Update `skills.md` when adding any of the above.
